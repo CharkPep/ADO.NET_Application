@@ -32,10 +32,13 @@ namespace MsSQLCsharp
 
             if (sqlConnection.State == ConnectionState.Open)
             {
-                MessageBox.Show("Connection was opened");
+                //MessageBox.Show("Connection was opened");
             }
 
-
+            var data = new SqlDataAdapter("SELECT * FROM Products", NorthWindConnection);
+            var dataSet = new DataSet();
+            data.Fill(dataSet);
+            dataGridView2.DataSource = dataSet.Tables[0];
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -63,16 +66,47 @@ namespace MsSQLCsharp
                 data.Fill(dataSet);
                 dataGridView1.DataSource = dataSet.Tables[0];
             }
-            catch
+            catch(Exception ex)
             {
-                MessageBox.Show("Wrong selection, try again.");
+                MessageBox.Show(ex.Message);
             }
 
         }
 
-        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
+        private void button3_Click(object sender, EventArgs e)
         {
+            listView1.Items.Clear();
 
+            SqlDataReader sqlDataReader = null;
+            try
+            {
+                var Command = new SqlCommand("SELECT ProductName, QuantityPerUnit, UnitPrice FROM Products", NorthWindConnection);
+                sqlDataReader = Command.ExecuteReader();
+                ListViewItem ListItem = null;
+                while (sqlDataReader.Read())
+                {
+                    ListItem = new ListViewItem(new string[] { Convert.ToString(sqlDataReader["ProductName"]), Convert.ToString(sqlDataReader["QuantityPerUnit"]), Convert.ToString(sqlDataReader["UnitPrice"]) });
+                    listView1.Items.Add(ListItem);
+                }
+
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                if (sqlDataReader != null && sqlDataReader.IsClosed)
+                {
+                    
+                }
+                sqlDataReader = null;
+            }
+        }
+
+        private void x(object sender, EventArgs e)
+        {
+            (dataGridView2.DataSource as DataTable).DefaultView.RowFilter = $"ProductName LIKE '%{textBox8.Text}%'"; 
         }
     }
 }
